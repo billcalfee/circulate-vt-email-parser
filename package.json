@@ -1,0 +1,15 @@
+{
+  "name": "circulate-vt-email-parser",
+  "version": "1.0.0",
+  "description": "Email to database parser for CirculateVT orders",
+  "main": "email-parser.js",
+  "scripts": {
+    "start": "node email-parser.js",
+    "test": "node test-parser.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.38.0",
+    "dotenv": "^16.3.1",
+    "node-fetch": "^3.3.2"
+  }
+}
