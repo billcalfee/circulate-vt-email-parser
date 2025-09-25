@@ -29,6 +29,8 @@ class OrderParser {
       // Parse each field
       if (trimmed.startsWith('Order Number:')) {
         order.order_number = trimmed.replace('Order Number:', '').trim();
+      } else if (trimmed.startsWith('Vendor Order Number:')) {
+        order.vendor_order_number = trimmed.replace('Vendor Order Number:', '').trim();
       } else if (trimmed.startsWith('Vendor Name:')) {
         order.vendor_name = trimmed.replace('Vendor Name:', '').trim();
       } else if (trimmed.startsWith('Vendor Phone:')) {
@@ -70,13 +72,30 @@ class OrderParser {
       order.delivery_charge = 4.99;
     }
 
-    // Generate order number if not provided
-    if (!order.order_number) {
-      order.order_number = 'ORD-' + Date.now();
-    }
-
     // Set vendor_id from vendor_name (simplified for MVP)
     order.vendor_id = order.vendor_name?.toLowerCase().replace(/\s+/g, '-');
+
+    // Use vendor's order number as our primary order number
+    // Format: [vendor-code]-[their-number] or just their number if already formatted
+    if (order.vendor_order_number) {
+      // If vendor provides their order number, use it as our primary ID
+      const vendorCode = order.vendor_id?.substring(0, 3).toUpperCase() || 'VND';
+
+      // If their number already includes vendor code, use as-is
+      if (order.vendor_order_number.includes('-') || order.vendor_order_number.length > 8) {
+        order.order_number = order.vendor_order_number;
+      } else {
+        // Otherwise, prefix with vendor code
+        order.order_number = `${vendorCode.toUpperCase()}-${order.vendor_order_number}`;
+      }
+
+      // Store their original number separately for reference
+      // (in case we need both formats)
+    } else if (!order.order_number) {
+      // Fallback: generate our own number if neither is provided
+      const vendorCode = order.vendor_id?.substring(0, 3).toUpperCase() || 'ORD';
+      order.order_number = `${vendorCode}-${Date.now()}`;
+    }
 
     // Default package size for MVP
     order.package_size = 'ONE_HAND';
